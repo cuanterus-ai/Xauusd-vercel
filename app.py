@@ -322,29 +322,35 @@ h+=`<div class="card sm">Backtest: TP1 ${d.stats.winrate_tp1} / TP2 ${d.stats.wi
 document.getElementById('o').innerHTML=h}
 </script></body></html>"""
 
-def create_app():
-    from flask import Flask, jsonify
-    app = Flask(__name__)
-    @app.route("/")
-    def index(): return PAGE
-    @app.route("/manifest.json")
-    def manifest():
-        return jsonify({"name": "XAUUSDc Analyzer", "short_name": "XAU Analyzer", "start_url": "/",
-                        "display": "standalone", "background_color": "#0f1115", "theme_color": "#0f1115",
-                        "icons": [{"src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"}]})
-    @app.route("/icon.svg")
-    def icon():
-        from flask import Response
-        svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="#0f1115"/><text x="50" y="62" font-size="38" font-weight="800" text-anchor="middle" fill="#d4a017" font-family="sans-serif">XAU</text></svg>'
-        return Response(svg, mimetype="image/svg+xml")
-    @app.route("/analyze")
-    def run(): return jsonify(analyze())
-    return app
+from flask import Flask, jsonify, Response
 
-try:
-    app = create_app()  # dipakai gunicorn: gunicorn app:app
-except ImportError:
-    app = None
+app = Flask(__name__)
+
+
+@app.route("/")
+def index():
+    return PAGE
+
+
+@app.route("/manifest.json")
+def manifest():
+    return jsonify({"name": "XAUUSDc Analyzer", "short_name": "XAU Analyzer", "start_url": "/",
+                    "display": "standalone", "background_color": "#0f1115", "theme_color": "#0f1115",
+                    "icons": [{"src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"}]})
+
+
+@app.route("/icon.svg")
+def icon():
+    svg = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" '
+           'fill="#0f1115"/><text x="50" y="62" font-size="38" font-weight="800" text-anchor="middle" '
+           'fill="#d4a017" font-family="sans-serif">XAU</text></svg>')
+    return Response(svg, mimetype="image/svg+xml")
+
+
+@app.route("/analyze")
+def run():
+    return jsonify(analyze())
+
 
 if __name__ == "__main__":
     if len(sys.argv) > 2 and sys.argv[1] == "--backtest": backtest(sys.argv[2])
